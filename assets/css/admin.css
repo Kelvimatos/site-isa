@@ -376,7 +376,46 @@ input[type="file"] {
   border: 1px solid rgba(231, 218, 208, 0.8);
   border-radius: var(--radius-sm);
   object-fit: cover;
+  background: #ffffff;
+  flex-shrink: 0;
+}
+
+.admin-image-preview-box {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin-top: var(--space-2);
+  padding: 6px 12px;
   background: var(--color-nude-light);
+  border: 1px solid rgba(231, 218, 208, 0.8);
+  border-radius: var(--radius-sm);
+  width: fit-content;
+}
+
+.admin-preview-thumb {
+  width: 54px;
+  height: 54px;
+  border-radius: var(--radius-xs);
+  object-fit: cover;
+  background: #ffffff;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.admin-preview-label {
+  font-size: var(--fs-xs);
+  color: var(--admin-muted);
+  font-weight: 500;
+}
+
+.variant-thumb-preview {
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-xs);
+  object-fit: cover;
+  background: #ffffff;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  margin-top: 6px;
+  display: block;
 }
 
 .product-placeholder {

@@ -40,6 +40,15 @@
     return Boolean(user && user.app_metadata && user.app_metadata.is_admin === true);
   }
 
+  function normalizeImageUrl(url) {
+    if (typeof url !== 'string' || !url.trim()) return '';
+    let clean = url.trim().replace(/\.(jpeg|jpg|png)$/i, '.webp');
+    if (!/^(https?:|\/|data:|\.\/)/i.test(clean) && clean.startsWith('assets/')) {
+      clean = './' + clean;
+    }
+    return clean;
+  }
+
   function slugFromName(name) {
     return String(name || '')
       .normalize('NFD')
@@ -96,9 +105,35 @@
     imageInput.type = 'file';
     imageInput.accept = 'image/jpeg,image/png,image/webp,image/gif';
     imageInput.className = 'variant-image-input';
-    imageInput.dataset.currentUrl = (variant && variant.image_url) || '';
+    const variantImgUrl = normalizeImageUrl((variant && variant.image_url) || '');
+    imageInput.dataset.currentUrl = variantImgUrl;
     const imageLabel = createTextField('Foto desta opção (opcional)', imageInput, 'variant-image-field');
-    if (variant && variant.image_url) {
+
+    const variantPreview = document.createElement('img');
+    variantPreview.className = 'variant-thumb-preview';
+    if (variantImgUrl) {
+      variantPreview.src = variantImgUrl;
+      variantPreview.alt = 'Foto da opção ' + ((variant && variant.name) || '');
+      variantPreview.onerror = () => { variantPreview.hidden = true; };
+    } else {
+      variantPreview.hidden = true;
+    }
+    imageLabel.appendChild(variantPreview);
+
+    imageInput.addEventListener('change', () => {
+      const file = imageInput.files && imageInput.files[0];
+      if (file) {
+        variantPreview.src = URL.createObjectURL(file);
+        variantPreview.hidden = false;
+      } else if (variantImgUrl) {
+        variantPreview.src = variantImgUrl;
+        variantPreview.hidden = false;
+      } else {
+        variantPreview.hidden = true;
+      }
+    });
+
+    if (variantImgUrl) {
       const hint = document.createElement('small');
       hint.textContent = 'Foto atual mantida se não escolher outra.';
       hint.className = 'field-hint';
@@ -138,9 +173,10 @@
     products.forEach((product) => {
       const row = document.createElement('article');
       row.className = 'product-row';
-      if (product.image_url) {
+      const imgUrl = normalizeImageUrl(product.image_url);
+      if (imgUrl) {
         const img = document.createElement('img');
-        img.src = product.image_url;
+        img.src = imgUrl;
         img.alt = product.image_alt || product.name;
         img.loading = 'lazy';
         img.onerror = () => { img.replaceWith(createPlaceholder()); };
@@ -203,6 +239,28 @@
     if (error) throw error;
     products = data || [];
     renderProducts();
+
+    // Sincroniza referências legadas (.jpeg/.png) para .webp diretamente no Supabase em segundo plano
+    try {
+      const legacyProducts = products.filter((p) =>
+        /\.(jpeg|jpg|png)$/i.test(p.image_url || '') ||
+        (Array.isArray(p.variants) && p.variants.some((v) => /\.(jpeg|jpg|png)$/i.test(v.image_url || '')))
+      );
+      if (legacyProducts.length > 0) {
+        for (const p of legacyProducts) {
+          const updatedImg = normalizeImageUrl(p.image_url);
+          const updatedVariants = Array.isArray(p.variants)
+            ? p.variants.map((v) => ({ ...v, image_url: normalizeImageUrl(v.image_url) }))
+            : p.variants;
+          await client.from('products').update({
+            image_url: updatedImg,
+            variants: updatedVariants
+          }).eq('id', p.id);
+        }
+      }
+    } catch (syncErr) {
+      console.warn('Aviso ao sincronizar imagens legadas no Supabase:', syncErr);
+    }
   }
 
   function openEditor(product) {
@@ -227,9 +285,40 @@
     byId('product-sort-order').value = product ? product.sort_order : products.length + 1;
     byId('product-active').checked = product ? product.is_active : true;
     byId('product-image').value = '';
-    byId('current-image-hint').textContent = product && product.image_url
+    const mainImgUrl = normalizeImageUrl(product && product.image_url);
+    const previewBox = byId('product-image-preview-box');
+    const previewImg = byId('product-image-preview-img');
+    const previewLabel = byId('product-image-preview-label');
+    if (previewBox && previewImg) {
+      if (mainImgUrl) {
+        previewImg.src = mainImgUrl;
+        previewImg.alt = 'Foto atual de ' + ((product && product.name) || '');
+        if (previewLabel) previewLabel.textContent = 'Foto atual';
+        previewBox.hidden = false;
+      } else {
+        previewBox.hidden = true;
+      }
+    }
+    byId('current-image-hint').textContent = mainImgUrl
       ? 'Foto atual cadastrada. Envie uma imagem de até 5 MB para substituí-la.'
       : 'Envie uma imagem de até 5 MB.';
+
+    byId('product-image').onchange = () => {
+      const file = byId('product-image').files && byId('product-image').files[0];
+      if (previewBox && previewImg) {
+        if (file) {
+          previewImg.src = URL.createObjectURL(file);
+          if (previewLabel) previewLabel.textContent = 'Nova foto selecionada';
+          previewBox.hidden = false;
+        } else if (mainImgUrl) {
+          previewImg.src = mainImgUrl;
+          if (previewLabel) previewLabel.textContent = 'Foto atual';
+          previewBox.hidden = false;
+        } else {
+          previewBox.hidden = true;
+        }
+      }
+    };
     if (product && Array.isArray(product.variants)) product.variants.forEach(addVariant);
     const editor = byId('product-editor');
     const heading = byId('dashboard-view').querySelector('.page-heading');
@@ -276,7 +365,7 @@
       const colorHex = row.querySelector('.variant-color-input').value;
       const imageInput = row.querySelector('.variant-image-input');
       const imageFile = imageInput.files && imageInput.files[0];
-      let imageUrl = imageInput.dataset.currentUrl || '';
+      let imageUrl = normalizeImageUrl(imageInput.dataset.currentUrl) || '';
       if (imageFile) imageUrl = await uploadImage(imageFile, slug);
       result.push({
         name,
@@ -303,7 +392,7 @@
       validateImage(mainFile);
       if (!existing && !mainFile) throw new Error('Escolha a foto principal do produto.');
 
-      const imageUrl = mainFile ? await uploadImage(mainFile, slug) : existing.image_url;
+      const imageUrl = mainFile ? await uploadImage(mainFile, slug) : normalizeImageUrl(existing.image_url);
       const categoryKey = byId('product-category').value;
       const categoryLabel = byId('product-category-label').value.trim() || categoryLabels[categoryKey] || 'Acessórios';
       const variants = await collectVariants(slug);
