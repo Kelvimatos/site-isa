@@ -1,0 +1,23 @@
+{
+  "name": "im-store",
+  "version": "1.0.0",
+  "description": "E-commerce responsivo e catálogo de beleza, autocuidado e acessórios femininos por Isabelly Matos.",
+  "type": "module",
+  "scripts": {
+    "build": "node scripts/build-config.mjs",
+    "start": "npx serve . -l 3000",
+    "dev": "node scripts/build-config.mjs && npx serve . -l 3000"
+  },
+  "keywords": [
+    "im-store",
+    "ecommerce",
+    "beleza",
+    "skincare",
+    "autocuidado",
+    "supabase",
+    "whatsapp-checkout"
+  ],
+  "author": "Isabelly Matos",
+  "license": "MIT"
+}
+

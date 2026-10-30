@@ -1,0 +1,9 @@
+# robots.txt — IM STORE (Produção)
+User-agent: *
+Allow: /
+Disallow: /admin.html
+Disallow: /supabase/
+
+# Sitemap de produção
+Sitemap: /sitemap.xml
+

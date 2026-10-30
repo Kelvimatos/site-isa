@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="theme-color" content="#efe0d6">
+  <title>Painel administrativo | IM Store</title>
+  <link rel="icon" href="./assets/images/logo/favicon.ico" type="image/x-icon">
+  <link rel="apple-touch-icon" href="./assets/images/logo/favicon.ico">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Playfair+Display:wght@600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./assets/css/style.css">
+  <link rel="stylesheet" href="./assets/css/admin.css?v=2">
+</head>
+<body>
+  <header class="admin-header">
+    <a class="brand-logo admin-brand" href="./index.html" aria-label="IM Store, voltar à loja">
+      <span class="brand-wordmark"><span class="brand-logo-im">IM</span><span class="brand-logo-store">STORE</span></span>
+      <span class="admin-brand-caption">PAINEL ADMINISTRATIVO</span>
+    </a>
+    <nav class="admin-nav" aria-label="Navegação do painel">
+      <a class="text-link" href="./index.html">Ver loja</a>
+      <button type="button" id="logout-button" class="button button-quiet" hidden>Sair</button>
+    </nav>
+  </header>
+
+  <main class="admin-main">
+    <section id="setup-notice" class="notice notice-warn" hidden>
+      <strong>Conexão com o Supabase ainda não configurada.</strong>
+      <span>Preencha a URL e a chave pública em <code>assets/js/supabase-config.js</code> e execute <code>supabase/schema.sql</code> no SQL Editor do seu projeto.</span>
+    </section>
+
+    <section id="login-view" class="login-card" hidden>
+      <span class="eyebrow">Acesso restrito</span>
+      <h1>Entrar no painel</h1>
+      <p>Use o e-mail e a senha da conta administrativa criada no Supabase.</p>
+      <form id="login-form" class="stack-form">
+        <label for="login-email">E-mail</label>
+        <input id="login-email" name="email" type="email" autocomplete="username" required>
+        <label for="login-password">Senha</label>
+        <input id="login-password" name="password" type="password" autocomplete="current-password" required>
+        <button class="button button-primary" type="submit">Entrar</button>
+        <p id="login-message" class="form-message" role="status" aria-live="polite"></p>
+      </form>
+    </section>
+
+    <section id="dashboard-view" hidden>
+      <div class="page-heading">
+        <div><span class="eyebrow">Gerencie sua loja</span><h1>Produtos</h1><p>Cadastre itens, fotos, preços e opções de cor.</p></div>
+        <button id="new-product-button" class="button button-primary" type="button">+ Novo produto</button>
+      </div>
+
+      <section class="admin-card product-list-card" aria-labelledby="list-title">
+        <div class="card-heading"><div><h2 id="list-title">Catálogo</h2><p id="product-count">Carregando produtos…</p></div><button id="refresh-button" class="button button-quiet" type="button">Atualizar</button></div>
+        <div id="products-list" class="products-list" aria-live="polite"></div>
+        <p id="dashboard-message" class="form-message" role="status" aria-live="polite"></p>
+      </section>
+
+      <section id="product-editor" class="admin-card editor-card" aria-labelledby="editor-title" hidden>
+        <div class="card-heading"><div><h2 id="editor-title">Novo produto</h2><p>Os campos com * são obrigatórios.</p></div><button id="cancel-edit-button" class="button button-quiet" type="button">Fechar</button></div>
+        <form id="product-form" class="product-form">
+          <input id="product-id" name="id" type="hidden">
+          <div class="form-grid">
+            <label class="field field-wide">Nome do produto *<input id="product-name" name="name" maxlength="120" required></label>
+            <label class="field">Categoria *
+              <select id="product-category" name="category_key" required>
+                <option value="esfoliantes">Esfoliantes faciais e corporais</option>
+                <option value="skincare">Acessórios para skincare</option>
+                <option value="faixas">Faixas de cabelo</option>
+                <option value="acessorios-beleza">Acessórios de beleza</option>
+                <option value="acessorios">Acessórios</option>
+              </select>
+            </label>
+            <label class="field">Nome da categoria exibido<input id="product-category-label" name="category_label" maxlength="80" placeholder="Ex.: Bio Instinto • Rosto e corpo"></label>
+            <label class="field field-wide">Descrição curta<input id="product-short-description" name="short_description" maxlength="180" placeholder="Resumo exibido no catálogo"></label>
+            <label class="field field-wide">Descrição completa *<textarea id="product-description" name="description" rows="4" required></textarea></label>
+            <label class="field">Preço (R$)<input id="product-price" name="price" type="number" min="0" step="0.01" placeholder="Deixe em branco se estiver sob consulta"></label>
+            <label class="field">Preço anterior (opcional)<input id="product-original-price" name="original_price" type="number" min="0" step="0.01"></label>
+            <label class="field">Detalhes do produto<input id="product-spec" name="spec" maxlength="180" placeholder="Ex.: 150 g • Rosto e corpo"></label>
+            <label class="field">Ordem no catálogo<input id="product-sort-order" name="sort_order" type="number" min="0" step="1" value="0"></label>
+            <label class="field field-wide">Cuidados / instruções<textarea id="product-care-note" name="care_note" rows="2"></textarea></label>
+            <label class="field field-wide">Destaques (um por linha)<textarea id="product-highlights" name="highlights" rows="3" placeholder="Uso facial e corporal&#10;Fragrância suave"></textarea></label>
+            <label class="field field-wide">Foto principal *<input id="product-image" name="image" type="file" accept="image/jpeg,image/png,image/webp,image/gif"><span id="current-image-hint" class="field-hint">Envie uma imagem de até 5 MB. Em edição, deixe vazio para manter a foto atual.</span></label>
+          </div>
+
+          <div class="variants-section">
+            <div class="card-heading"><div><h3>Variações de cor e tamanho</h3><p>Adicione opções; a foto específica de cada opção é opcional.</p></div><button id="add-variant-button" type="button" class="button button-outline">+ Adicionar variação</button></div>
+            <div id="variants-list" class="variants-list"></div>
+          </div>
+
+          <label class="active-toggle"><input id="product-active" type="checkbox" checked><span><strong>Produto publicado</strong><small>Desative para ocultar o produto da loja sem excluí-lo.</small></span></label>
+          <div class="editor-actions"><button id="delete-product-button" class="button button-danger" type="button" hidden>Excluir produto</button><span class="spacer"></span><button id="cancel-edit-button-bottom" class="button button-quiet" type="button">Cancelar</button><button id="save-product-button" class="button button-primary" type="submit">Salvar produto</button></div>
+          <p id="editor-message" class="form-message" role="status" aria-live="polite"></p>
+        </form>
+      </section>
+    </section>
+  </main>
+
+  <div id="admin-toast" class="admin-toast" role="status" aria-live="polite" hidden></div>
+  <footer class="admin-footer"><span>IM Store · Administração</span><a href="./index.html">Voltar para a loja</a></footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="./assets/js/supabase-config.js"></script>
+  <script src="./assets/js/supabase-client.js"></script>
+  <script src="./assets/js/admin.js?v=3"></script>
+</body>
+</html>

@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Página não encontrada | IM Store</title>
+  <meta name="description" content="A página que você procura não foi encontrada. Volte para a página inicial da IM Store.">
+  <meta name="robots" content="noindex, follow">
+  <meta name="theme-color" content="#EFE0D6">
+
+  <!-- Favicon oficial IM Store -->
+  <link rel="icon" href="./assets/images/logo/favicon.ico" type="image/ico">
+  <link rel="apple-touch-icon" href="./assets/images/logo/favicon.ico">
+
+  <!-- Tipografia -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,500&family=Playfair+Display:wght@600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap"
+    rel="stylesheet">
+
+  <link rel="stylesheet" href="./assets/css/style.css">
+  <style>
+    .error-page-wrapper {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      padding: var(--space-8) var(--space-4);
+      background: radial-gradient(circle at 50% 30%, #fffbf8 0%, #f7ede5 100%);
+    }
+
+    .error-code {
+      font-family: var(--font-title);
+      font-size: clamp(4rem, 12vw, 8rem);
+      font-weight: 700;
+      color: var(--color-brown-base);
+      line-height: 1;
+      margin-bottom: var(--space-2);
+      letter-spacing: -0.02em;
+    }
+
+    .error-title {
+      font-family: var(--font-heading);
+      font-size: clamp(1.5rem, 4vw, 2.25rem);
+      color: var(--color-gray-900);
+      margin-bottom: var(--space-3);
+    }
+
+    .error-description {
+      font-family: var(--font-body);
+      font-size: 1.05rem;
+      color: var(--color-gray-600);
+      max-width: 480px;
+      margin: 0 auto var(--space-6);
+      line-height: 1.6;
+    }
+
+    .error-actions {
+      display: flex;
+      gap: var(--space-3);
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+  </style>
+</head>
+
+<body>
+  <main class="error-page-wrapper">
+    <a href="./index.html" class="brand-logo" aria-label="IM STORE — Ir para a página inicial" style="margin-bottom: 2rem;">
+      <h1 class="brand-wordmark">
+        <span class="brand-logo-im">IM</span>
+        <span class="brand-logo-store">STORE</span>
+      </h1>
+    </a>
+
+    <span class="error-code">404</span>
+    <h2 class="error-title">Página não encontrada</h2>
+    <p class="error-description">
+      O endereço que você tentou acessar não existe ou foi movido. Que tal explorar os nossos produtos e rituais de autocuidado?
+    </p>
+
+    <div class="error-actions">
+      <a href="./index.html" class="btn btn-primary">
+        Ir para a página inicial
+      </a>
+      <a href="./index.html#catalogo" class="btn btn-outline">
+        Ver catálogo de produtos
+      </a>
+    </div>
+  </main>
+</body>
+
+</html>
+
