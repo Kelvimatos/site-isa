@@ -28,9 +28,9 @@ function parseEnv(filePath) {
 }
 
 const fileEnv = parseEnv(path.join(ROOT_DIR, '.env'));
-const SUPABASE_URL = process.env.SUPABASE_URL || fileEnv.SUPABASE_URL || '';
-const SUPABASE_PUBLISHABLE_KEY = process.env.SUPABASE_PUBLISHABLE_KEY || fileEnv.SUPABASE_PUBLISHABLE_KEY || '';
-const WHATSAPP_NUMBER = process.env.WHATSAPP_NUMBER || fileEnv.WHATSAPP_NUMBER || '';
+const SUPABASE_URL = process.env.SUPABASE_URL || fileEnv.SUPABASE_URL || 'https://jysjypyqsnqorqhtplxb.supabase.co';
+const SUPABASE_PUBLISHABLE_KEY = process.env.SUPABASE_PUBLISHABLE_KEY || fileEnv.SUPABASE_PUBLISHABLE_KEY || 'sb_publishable_MzmLzQs-jYG5k2G7NE8Z9w_sWSIQ3cw';
+const WHATSAPP_NUMBER = process.env.WHATSAPP_NUMBER || fileEnv.WHATSAPP_NUMBER || '5511986216603';
 
 const targetConfigPath = path.join(ROOT_DIR, 'assets', 'js', 'supabase-config.js');
 
