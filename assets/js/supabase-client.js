@@ -19,8 +19,16 @@
   }
 
   function normalizeImageUrl(url) {
-    if (typeof url !== 'string') return '';
-    return url.replace(/\.(jpeg|jpg|png)$/i, '.webp');
+    if (typeof url !== 'string' || !url.trim()) return '';
+    let clean = url.trim();
+    if (!/^(https?:|\/|data:|\.\/)/i.test(clean) && clean.startsWith('assets/')) {
+      clean = './' + clean;
+    }
+    // Auto-recuperação de URLs do Supabase Storage corrompidas para .webp
+    if (clean.includes('/storage/v1/object/public/product-images/') && clean.endsWith('.webp')) {
+      clean = clean.replace(/\.webp$/i, '.jpg');
+    }
+    return clean;
   }
 
   function toStoreProduct(row) {
@@ -48,6 +56,10 @@
       'acessorios-beleza': ['todos', 'acessorios', 'acessorios-beleza']
     };
 
+    const isContainProduct = categoryKey === 'skincare' ||
+      categoryKey === 'faixas' ||
+      (typeof row.slug === 'string' && (row.slug.includes('escova') || row.slug.includes('faixa')));
+
     return {
       id: row.slug,
       name: row.name,
@@ -60,7 +72,7 @@
       description: row.description || row.short_description || '',
       image: normalizeImageUrl(row.image_url) || '',
       imageAlt: row.image_alt || row.name,
-      imageFit: 'contain',
+      imageFit: row.image_fit || (isContainProduct ? 'contain' : 'cover'),
       careNote: row.care_note || '',
       highlights: Array.isArray(row.highlights) ? row.highlights : [],
       variants: variantNames.length ? variantNames : ['Unidade'],

@@ -364,7 +364,6 @@ header[id] {
 
 /* Margem de rolagem para ancoragem perfeita abaixo do cabeçalho fixo */
 #inicio,
-#sobre,
 #categorias,
 #catalogo,
 #cuidados-pele,
@@ -1339,7 +1338,8 @@ html.js-ready .reveal-on-scroll.is-visible {
 
 .categories-section {
   background-color: var(--color-surface);
-  padding-block: var(--space-12);
+  padding-top: clamp(4.5rem, 7vw, 6.5rem);
+  padding-bottom: var(--space-12);
 }
 
 .categories-grid {
@@ -1566,7 +1566,8 @@ html.js-ready .reveal-on-scroll.is-visible {
 }
 
 .product-card-media.has-contain-img,
-.product-card[data-product-id="escova-limpeza-facial"] .product-card-media {
+.product-card[data-product-id="escova-limpeza-facial"] .product-card-media,
+.product-card[data-product-id="escova-de-limpeza-facial-2-em-1"] .product-card-media {
   background-color: #f7f3ee;
   display: flex;
   align-items: center;
@@ -1589,13 +1590,16 @@ html.js-ready .reveal-on-scroll.is-visible {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  object-position: center;
   display: block;
   transition: transform 450ms cubic-bezier(0.16, 1, 0.3, 1), opacity 200ms ease;
 }
 
 .product-card-img.fit-contain,
-.product-card[data-product-id="escova-limpeza-facial"] .product-card-img {
+.product-card[data-product-id="escova-limpeza-facial"] .product-card-img,
+.product-card[data-product-id="escova-de-limpeza-facial-2-em-1"] .product-card-img {
   object-fit: contain !important;
+  object-position: center;
   width: 100% !important;
   height: 100% !important;
   max-width: 100%;
@@ -2155,243 +2159,7 @@ html.js-ready .reveal-on-scroll.is-visible {
 }
 
 /* ==========================================================================
-   9. SEÇÃO INSTITUCIONAL E BIOGRÁFICA — SOBRE ISABELLY MATOS
-   ========================================================================== */
-
-.about-section {
-  background: linear-gradient(180deg, var(--color-surface) 0%, var(--color-beige-subtle) 100%);
-  border-top: none;
-}
-
-.about-editorial-grid {
-  display: grid;
-  grid-template-columns: minmax(320px, 1.08fr) minmax(300px, 0.92fr);
-  gap: clamp(2rem, 5vw, 4.5rem);
-  align-items: center;
-}
-
-.about-text-column {
-  max-width: 580px;
-}
-
-.about-title {
-  margin-bottom: var(--space-5);
-}
-
-.about-body-text {
-  font-size: var(--fs-body);
-  line-height: 1.75;
-  color: var(--color-text-body);
-  display: grid;
-  gap: var(--space-4);
-  margin-bottom: var(--space-6);
-}
-
-.about-body-text strong {
-  color: var(--color-coffee-dark);
-  font-weight: 600;
-}
-
-.about-closing-quote {
-  font-family: var(--font-serif);
-  font-size: 1.15rem;
-  font-style: italic;
-  font-weight: 600;
-  color: var(--color-coffee-brand);
-  line-height: 1.45;
-  padding-left: var(--space-3);
-  border-left: 2px solid var(--color-rose-muted);
-}
-
-.about-values-card {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-3);
-  padding: 0.75rem 1.35rem;
-  background-color: var(--color-nude);
-  border: 1px solid var(--color-nude-warm);
-  border-radius: var(--radius-pill);
-  box-shadow: var(--shadow-xs);
-}
-
-.about-values-bullet {
-  color: var(--color-coffee-brand);
-  font-size: 0.9rem;
-}
-
-.about-values-text {
-  font-family: var(--font-serif);
-  font-size: 1.05rem;
-  font-weight: 700;
-  letter-spacing: 0.04em;
-  color: var(--color-coffee-dark);
-}
-
-/* Coluna Direita: Composição Visual Editorial */
-.about-media-column {
-  position: relative;
-  width: 100%;
-}
-
-.about-media-composition {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  max-width: 480px;
-  margin-inline: auto;
-}
-
-.about-portrait-figure {
-  position: relative;
-  width: 100%;
-  max-width: 430px;
-  border-radius: var(--radius-lg);
-  overflow: hidden;
-  box-shadow: 0 20px 42px rgba(56, 34, 22, 0.12);
-  border: 1px solid var(--color-border);
-  background-color: var(--color-nude-light);
-}
-
-.about-portrait-img {
-  width: 100%;
-  height: 118%;
-  margin-top: -9%;
-  aspect-ratio: 3 / 4;
-  object-fit: cover;
-  object-position: center top;
-  display: block;
-  transform: translate3d(0, var(--parallax-y, 0px), 0);
-  will-change: transform;
-}
-
-.about-portrait-badge {
-  position: absolute;
-  top: var(--space-4);
-  left: var(--space-4);
-  background: rgba(255, 255, 255, 0.94);
-  backdrop-filter: blur(8px);
-  padding: 0.45rem 0.95rem;
-  border-radius: var(--radius-pill);
-  border: 1px solid rgba(213, 194, 180, 0.85);
-  box-shadow: var(--shadow-sm);
-  display: flex;
-  flex-direction: column;
-  transform: translate3d(0, var(--parallax-badge-y, 0px), 0);
-  opacity: var(--parallax-badge-opacity, 1);
-  will-change: transform, opacity;
-}
-
-.about-badge-name {
-  font-family: var(--font-serif);
-  font-size: 0.95rem;
-  font-weight: 700;
-  color: var(--color-coffee-dark);
-  line-height: 1.1;
-}
-
-.about-badge-role {
-  font-size: 0.68rem;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: var(--color-coffee-brand);
-  font-weight: 600;
-}
-
-/* Card do Instagram Sobreposto */
-.about-instagram-card {
-  width: 92%;
-  max-width: 380px;
-  margin-top: -30px;
-  margin-left: auto;
-  margin-right: -10px;
-  z-index: 2;
-  position: relative;
-  background-color: #000000;
-  border-radius: var(--radius-md);
-  box-shadow: 0 18px 36px rgba(0, 0, 0, 0.28);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  overflow: hidden;
-  transform: translate3d(0, var(--parallax-y, 0px), 0);
-  will-change: transform;
-  transition: transform var(--transition-base), box-shadow var(--transition-base);
-}
-
-.about-instagram-card:hover {
-  transform: translate3d(0, var(--parallax-y, 0px), 0) translateY(-4px);
-  box-shadow: 0 24px 44px rgba(0, 0, 0, 0.35);
-}
-
-.about-instagram-link {
-  display: block;
-  text-decoration: none;
-  color: #FFFFFF;
-}
-
-.about-instagram-header {
-  padding: 0.65rem 0.95rem;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  background-color: #121212;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-}
-
-.about-instagram-tag {
-  font-size: 0.68rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  color: var(--color-rose-muted);
-}
-
-.about-instagram-handle {
-  font-size: 0.75rem;
-  font-weight: 600;
-  color: #FFFFFF;
-}
-
-.about-instagram-figure {
-  width: 100%;
-  background-color: #000000;
-  margin: 0;
-  line-height: 0;
-}
-
-.about-instagram-img {
-  width: 100%;
-  height: auto;
-  display: block;
-  object-fit: contain;
-}
-
-.about-instagram-footer {
-  padding: 0.65rem 0.95rem;
-  background-color: #121212;
-  border-top: 1px solid rgba(255, 255, 255, 0.08);
-}
-
-.about-instagram-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: var(--space-2);
-  width: 100%;
-  padding: 0.45rem 0.75rem;
-  font-size: var(--fs-xs);
-  font-weight: 600;
-  color: #FFFFFF;
-  background: linear-gradient(135deg, #833AB4 0%, #FD1D1D 50%, #F77737 100%);
-  border-radius: var(--radius-xs);
-  transition: opacity var(--transition-fast);
-}
-
-.about-instagram-btn:hover {
-  opacity: 0.92;
-}
-
-/* ==========================================================================
-   10. COMPROMISSO IM STORE
+   9. COMPROMISSO IM STORE
    ========================================================================== */
 
 .benefits-section {
@@ -3435,20 +3203,9 @@ html.js-ready .reveal-on-scroll.is-visible {
     gap: 2rem 1.25rem;
   }
 
-  .skincare-editorial-grid,
-  .about-editorial-grid {
+  .skincare-editorial-grid {
     grid-template-columns: 1fr;
     gap: var(--space-8);
-  }
-
-  .about-text-column {
-    max-width: 100%;
-  }
-
-  .about-instagram-card {
-    margin-top: var(--space-4);
-    margin-inline: auto;
-    width: 100%;
   }
 
   .footer-top-grid {
@@ -3550,6 +3307,21 @@ html.js-ready .reveal-on-scroll.is-visible {
   .product-grid {
     grid-template-columns: repeat(2, 1fr);
     gap: 1.25rem 0.65rem;
+  }
+
+  .product-card-media {
+    margin-bottom: 0.55rem;
+  }
+
+  .product-image-placeholder {
+    padding: var(--space-2);
+    gap: var(--space-1);
+    font-size: 0.72rem;
+  }
+
+  .product-image-placeholder svg {
+    width: 26px;
+    height: 26px;
   }
 
   .product-favorite-btn {
@@ -3687,9 +3459,6 @@ html.js-ready .reveal-on-scroll.is-visible {
   .hero-col-center,
   .hero-col-left,
   .hero-col-right,
-  .about-portrait-img,
-  .about-portrait-badge,
-  .about-instagram-card,
   .category-img,
   .skincare-editorial-img,
   .skincare-figcaption,

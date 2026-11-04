@@ -305,9 +305,14 @@
   }
 
   function getProductFallbackImage(product) {
-    return product && product.id === 'faixa-cabelo-make'
-      ? './assets/images/faixadecabelo.webp'
-      : '';
+    if (!product) return '';
+    if (product.id === 'faixa-cabelo-make' || product.id === 'faixa-de-cabelo-plush-com-laco') {
+      return './assets/images/faixadecabelo.webp';
+    }
+    if (product.id === 'escova-limpeza-facial' || product.id === 'escova-de-limpeza-facial-2-em-1') {
+      return './assets/images/escovafacial.webp';
+    }
+    return '';
   }
 
   function getProductImageForVariant(product, variantName) {
@@ -325,7 +330,7 @@
     const placeholder = document.createElement('div');
     placeholder.className = 'product-image-placeholder';
     placeholder.setAttribute('role', 'img');
-    placeholder.setAttribute('aria-label', 'Imagem temporariamente indisponível para ' + product.name);
+    placeholder.setAttribute('aria-label', 'Imagem temporariamente indisponível para ' + (product && product.name ? product.name : 'o produto'));
 
     const icon = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
     icon.setAttribute('viewBox', '0 0 24 24');
@@ -348,7 +353,8 @@
     icon.append(frame, imageMark);
 
     const caption = document.createElement('span');
-    caption.textContent = 'Foto do produto indisponível';
+    caption.className = 'placeholder-caption';
+    caption.textContent = 'Foto em breve';
     placeholder.append(icon, caption);
     return placeholder;
   }
@@ -362,23 +368,36 @@
 
     if (img.dataset.productFallbackBound !== 'true') {
       img.addEventListener('error', () => {
-        const fallback = img.dataset.productFallbackSrc || '';
-        if (!fallback) return;
-
-        const fallbackUrl = new URL(fallback, document.baseURI).href;
         const failedUrl = img.currentSrc || img.src;
-        if (img.dataset.productFallbackApplied !== 'true' && failedUrl !== fallbackUrl) {
-          img.dataset.productFallbackApplied = 'true';
-          img.src = fallbackUrl;
-          return;
+
+        // Auto-recuperação: se a imagem no Supabase falhar com .webp, tenta automaticamente com .jpg e .png
+        if (failedUrl && failedUrl.includes('/storage/v1/object/public/product-images/')) {
+          if (failedUrl.endsWith('.webp') && !img.dataset.retryAttempt) {
+            img.dataset.retryAttempt = 'jpg';
+            img.src = failedUrl.replace(/\.webp$/i, '.jpg');
+            return;
+          } else if (img.dataset.retryAttempt === 'jpg') {
+            img.dataset.retryAttempt = 'png';
+            img.src = failedUrl.replace(/\.jpg$/i, '.png');
+            return;
+          }
         }
 
+        const fallback = img.dataset.productFallbackSrc || '';
+        if (fallback) {
+          const fallbackUrl = new URL(fallback, document.baseURI).href;
+          if (img.dataset.productFallbackApplied !== 'true' && failedUrl !== fallbackUrl) {
+            img.dataset.productFallbackApplied = 'true';
+            img.src = fallbackUrl;
+            return;
+          }
+        }
+
+        // Se a imagem falhou e não há mais alternativas, oculta a tag quebrada e exibe o placeholder elegante
         img.hidden = true;
         const target = img.closest('.product-card-media, .detail-main-figure') || imageContainer;
         if (target && !target.querySelector('.product-image-placeholder')) {
-          target.appendChild(createProductImagePlaceholder({
-            name: img.dataset.productImageName || product.name
-          }));
+          target.appendChild(createProductImagePlaceholder(product));
         }
       });
       img.dataset.productFallbackBound = 'true';
@@ -390,9 +409,20 @@
     }
     img.hidden = false;
     img.dataset.productFallbackApplied = 'false';
+    delete img.dataset.retryAttempt;
     img.dataset.productImageName = product.name;
     img.alt = product.name + (variantName ? ' — ' + variantName : '');
-    img.src = getProductImageForVariant(product, variantName);
+
+    const targetSrc = getProductImageForVariant(product, variantName);
+    if (!targetSrc) {
+      // Se não há URL de imagem cadastrada, exibe diretamente o placeholder elegante
+      img.hidden = true;
+      if (imageContainer && !imageContainer.querySelector('.product-image-placeholder')) {
+        imageContainer.appendChild(createProductImagePlaceholder(product));
+      }
+    } else {
+      img.src = targetSrc;
+    }
   }
 
   function getEffectivePrice(productId) {
@@ -1873,9 +1903,6 @@
       '.skincare-info-figure',
       '.skincare-text-column',
       '.ritual-steps-list .ritual-step',
-      '.about-text-column',
-      '.about-portrait-figure',
-      '.about-instagram-card',
       '.benefits-grid .benefit-card'
     ];
 
@@ -1891,7 +1918,7 @@
   }
 
   function initNavScrollSpy() {
-    const sectionIds = ['inicio', 'sobre', 'catalogo', 'beneficios'];
+    const sectionIds = ['inicio', 'catalogo', 'beneficios'];
     const sectionMap = sectionIds
       .map((id) => ({ id, el: document.getElementById(id) }))
       .filter((item) => item.el !== null);
@@ -2735,49 +2762,7 @@
       });
     }
 
-    // 2. Sobre Isabelly Matos
-    const sobreSection = document.getElementById('sobre');
-    if (sobreSection) {
-      registerSection(sobreSection, (section, { useScroll, useTransform }) => {
-        const scrollYProgress = useScroll({
-          target: section,
-          offset: ['start end', 'end start']
-        });
-
-        const portraitY = useTransform(scrollYProgress, [0, 1], ['-8%', '8%']);
-        const badgeOpacity = useTransform(scrollYProgress, [0.15, 0.35, 0.78, 0.95], [0, 1, 1, 0]);
-        const badgeY = useTransform(scrollYProgress, [0.15, 0.35, 0.78, 0.95], ['12px', '0px', '0px', '-12px']);
-        const instaCardY = useTransform(scrollYProgress, [0, 1], ['22px', '-22px']);
-
-        const portraitImg = section.querySelector('.about-portrait-img');
-        const badgeEl = section.querySelector('.about-portrait-badge');
-        const instaCardEl = section.querySelector('.about-instagram-card');
-
-        return [
-          {
-            element: portraitImg,
-            apply: (scale) => {
-              portraitImg.style.setProperty('--parallax-y', portraitY(scale));
-            }
-          },
-          {
-            element: badgeEl,
-            apply: (scale) => {
-              badgeEl.style.setProperty('--parallax-badge-y', badgeY(scale));
-              badgeEl.style.setProperty('--parallax-badge-opacity', badgeOpacity(1));
-            }
-          },
-          {
-            element: instaCardEl,
-            apply: (scale) => {
-              instaCardEl.style.setProperty('--parallax-y', instaCardY(scale));
-            }
-          }
-        ].filter((b) => b.element);
-      });
-    }
-
-    // 3. Categorias (Vitrine estilo Nike)
+    // 2. Categorias (Vitrine estilo Nike)
     const catSection = document.getElementById('categorias');
     if (catSection) {
       registerSection(catSection, (section, { useScroll, useTransform }) => {

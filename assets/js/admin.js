@@ -42,7 +42,7 @@
 
   function normalizeImageUrl(url) {
     if (typeof url !== 'string' || !url.trim()) return '';
-    let clean = url.trim().replace(/\.(jpeg|jpg|png)$/i, '.webp');
+    let clean = url.trim();
     if (!/^(https?:|\/|data:|\.\/)/i.test(clean) && clean.startsWith('assets/')) {
       clean = './' + clean;
     }
@@ -240,26 +240,23 @@
     products = data || [];
     renderProducts();
 
-    // Sincroniza referências legadas (.jpeg/.png) para .webp diretamente no Supabase em segundo plano
+    // Auto-recuperação: repara no Supabase os produtos cujas URLs foram convertidas para .webp por engano
     try {
-      const legacyProducts = products.filter((p) =>
-        /\.(jpeg|jpg|png)$/i.test(p.image_url || '') ||
-        (Array.isArray(p.variants) && p.variants.some((v) => /\.(jpeg|jpg|png)$/i.test(v.image_url || '')))
+      const corrupted = products.filter((p) =>
+        p.image_url && p.image_url.includes('/storage/v1/object/public/product-images/') && p.image_url.endsWith('.webp')
       );
-      if (legacyProducts.length > 0) {
-        for (const p of legacyProducts) {
-          const updatedImg = normalizeImageUrl(p.image_url);
-          const updatedVariants = Array.isArray(p.variants)
-            ? p.variants.map((v) => ({ ...v, image_url: normalizeImageUrl(v.image_url) }))
-            : p.variants;
-          await client.from('products').update({
-            image_url: updatedImg,
-            variants: updatedVariants
-          }).eq('id', p.id);
-        }
+      for (const p of corrupted) {
+        const jpgUrl = p.image_url.replace(/\.webp$/i, '.jpg');
+        try {
+          const testRes = await fetch(jpgUrl, { method: 'HEAD' });
+          if (testRes.ok) {
+            await client.from('products').update({ image_url: jpgUrl }).eq('id', p.id);
+            p.image_url = jpgUrl;
+          }
+        } catch (_) {}
       }
     } catch (syncErr) {
-      console.warn('Aviso ao sincronizar imagens legadas no Supabase:', syncErr);
+      console.warn('Aviso na verificação de imagens:', syncErr);
     }
   }
 
@@ -303,20 +300,30 @@
       ? 'Foto atual cadastrada. Envie uma imagem de até 5 MB para substituí-la.'
       : 'Envie uma imagem de até 5 MB.';
 
-    byId('product-image').onchange = () => {
+    byId('product-image').onchange = async () => {
       const file = byId('product-image').files && byId('product-image').files[0];
-      if (previewBox && previewImg) {
-        if (file) {
-          previewImg.src = URL.createObjectURL(file);
-          if (previewLabel) previewLabel.textContent = 'Nova foto selecionada';
-          previewBox.hidden = false;
-        } else if (mainImgUrl) {
-          previewImg.src = mainImgUrl;
-          if (previewLabel) previewLabel.textContent = 'Foto atual';
-          previewBox.hidden = false;
-        } else {
-          previewBox.hidden = true;
+      if (file) {
+        try {
+          await validateImageFile(file, true);
+          setMessage('editor-message', '');
+          if (previewBox && previewImg) {
+            previewImg.src = URL.createObjectURL(file);
+            if (previewLabel) previewLabel.textContent = 'Nova foto selecionada';
+            previewBox.hidden = false;
+          }
+        } catch (valErr) {
+          byId('product-image').value = '';
+          if (previewBox) previewBox.hidden = !mainImgUrl;
+          if (previewImg && mainImgUrl) previewImg.src = mainImgUrl;
+          setMessage('editor-message', valErr.message, true);
+          notify(valErr.message);
         }
+      } else if (mainImgUrl) {
+        if (previewImg) previewImg.src = mainImgUrl;
+        if (previewLabel) previewLabel.textContent = 'Foto atual';
+        if (previewBox) previewBox.hidden = false;
+      } else if (previewBox) {
+        previewBox.hidden = true;
       }
     };
     if (product && Array.isArray(product.variants)) product.variants.forEach(addVariant);
@@ -333,26 +340,55 @@
     setMessage('editor-message', '');
   }
 
-  function validateImage(file) {
-    if (!file) return;
-    if (!['image/jpeg', 'image/png', 'image/webp', 'image/gif'].includes(file.type)) {
-      throw new Error('Use uma imagem JPG, PNG, WebP ou GIF.');
+  async function validateImageFile(file, isRequired = false) {
+    if (!file) {
+      if (isRequired) throw new Error('Selecione uma imagem para o produto.');
+      return;
     }
-    if (file.size > 5 * 1024 * 1024) throw new Error('Cada imagem pode ter no máximo 5 MB.');
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+    if (!allowedTypes.includes(file.type)) {
+      throw new Error('Formato de imagem inválido (' + (file.type || 'não identificado') + '). Use apenas JPG, PNG, WebP ou GIF.');
+    }
+    if (file.size === 0) {
+      throw new Error('O arquivo de imagem selecionado está vazio (0 bytes).');
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      const sizeMb = (file.size / (1024 * 1024)).toFixed(1);
+      throw new Error('A imagem selecionada possui ' + sizeMb + ' MB. O limite máximo permitido é de 5 MB.');
+    }
+    await new Promise((resolve, reject) => {
+      const testImg = new Image();
+      const objUrl = URL.createObjectURL(file);
+      testImg.onload = () => {
+        URL.revokeObjectURL(objUrl);
+        if (testImg.naturalWidth < 10 || testImg.naturalHeight < 10) {
+          reject(new Error('A imagem é muito pequena ou está corrompida. Dimensões mínimas: 10x10 px.'));
+        } else {
+          resolve();
+        }
+      };
+      testImg.onerror = () => {
+        URL.revokeObjectURL(objUrl);
+        reject(new Error('O arquivo selecionado não pôde ser lido como uma imagem válida ou está corrompido.'));
+      };
+      testImg.src = objUrl;
+    });
   }
 
   async function uploadImage(file, slug) {
     if (!file) return '';
-    validateImage(file);
+    await validateImageFile(file, true);
     const extensionByType = { 'image/jpeg': 'jpg', 'image/png': 'png', 'image/webp': 'webp', 'image/gif': 'gif' };
-    const path = 'products/' + slug + '/' + crypto.randomUUID() + '.' + extensionByType[file.type];
+    const ext = extensionByType[file.type] || 'jpg';
+    const path = 'products/' + slug + '/' + crypto.randomUUID() + '.' + ext;
     const { error } = await client.storage.from('product-images').upload(path, file, {
       cacheControl: '3600',
       contentType: file.type,
       upsert: false
     });
     if (error) throw error;
-    return client.storage.from('product-images').getPublicUrl(path).data.publicUrl;
+    const { data } = client.storage.from('product-images').getPublicUrl(path);
+    return data.publicUrl;
   }
 
   async function collectVariants(slug) {
@@ -366,7 +402,10 @@
       const imageInput = row.querySelector('.variant-image-input');
       const imageFile = imageInput.files && imageInput.files[0];
       let imageUrl = normalizeImageUrl(imageInput.dataset.currentUrl) || '';
-      if (imageFile) imageUrl = await uploadImage(imageFile, slug);
+      if (imageFile) {
+        await validateImageFile(imageFile, true);
+        imageUrl = await uploadImage(imageFile, slug);
+      }
       result.push({
         name,
         color_hex: colorEnabled ? colorHex : null,
@@ -388,11 +427,14 @@
       const slug = slugFromName(name);
       if (!slug) throw new Error('Informe um nome válido para o produto.');
       const existing = products.find((item) => item.id === byId('product-id').value);
-      const mainFile = byId('product-image').files[0];
-      validateImage(mainFile);
-      if (!existing && !mainFile) throw new Error('Escolha a foto principal do produto.');
+      const mainFile = byId('product-image').files && byId('product-image').files[0];
 
-      const imageUrl = mainFile ? await uploadImage(mainFile, slug) : normalizeImageUrl(existing.image_url);
+      if (!existing && !mainFile) throw new Error('Escolha a foto principal do produto.');
+      if (mainFile) await validateImageFile(mainFile, true);
+
+      const imageUrl = mainFile ? await uploadImage(mainFile, slug) : (existing ? normalizeImageUrl(existing.image_url) : '');
+      if (!imageUrl) throw new Error('O produto precisa ter uma foto cadastrada.');
+
       const categoryKey = byId('product-category').value;
       const categoryLabel = byId('product-category-label').value.trim() || categoryLabels[categoryKey] || 'Acessórios';
       const variants = await collectVariants(slug);
@@ -426,9 +468,12 @@
       if (response.error) throw response.error;
       await loadProducts();
       closeEditor();
-      notify(existing ? 'Produto atualizado. Recarregue a loja para ver a alteração.' : 'Produto cadastrado. Recarregue a loja para ver a alteração.');
+      notify(existing ? 'Produto atualizado. Recarregue a loja para ver a alteração.' : 'Produto cadastrado com sucesso!');
     } catch (error) {
       setMessage('editor-message', error.message || 'Não foi possível salvar o produto.', true);
+      notify(error.message || 'Erro ao salvar o produto.');
+      const msgEl = byId('editor-message');
+      if (msgEl) msgEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
     } finally {
       saveButton.disabled = false;
       saveButton.textContent = 'Salvar produto';
