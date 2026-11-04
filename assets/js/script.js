@@ -2884,44 +2884,40 @@
     if (!section) return;
 
     const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    if (prefersReducedMotion) return;
+    const scrollPath = section.querySelector('.showcase-scroll-path');
+
+    // Se usuário prefere movimento reduzido, exibe a linha desenhada estaticamente
+    if (prefersReducedMotion) {
+      if (scrollPath) {
+        scrollPath.style.strokeDasharray = 'none';
+        scrollPath.style.strokeDashoffset = '0';
+      }
+      return;
+    }
 
     if (typeof window.gsap !== 'undefined' && typeof window.ScrollTrigger !== 'undefined') {
       window.gsap.registerPlugin(window.ScrollTrigger);
 
-      // 1. Trilha Ondulada SVG (Wave Track Ribbon & Line)
-      const trackLine = section.querySelector('.showcase-track-line');
-      const trackRibbon = section.querySelector('.showcase-track-ribbon');
-      if (trackLine) {
-        window.gsap.to(trackLine, {
-          strokeDashoffset: -600,
+      // 1. Linha Curva Branca no lado direito: Desenho progressivo vinculado ao scroll (scrub)
+      if (scrollPath) {
+        const pathLength = scrollPath.getTotalLength();
+        scrollPath.style.strokeDasharray = pathLength;
+        scrollPath.style.strokeDashoffset = pathLength;
+
+        window.gsap.to(scrollPath, {
+          strokeDashoffset: 0,
           ease: 'none',
           scrollTrigger: {
             trigger: section,
-            start: 'top bottom',
-            end: 'bottom top',
-            scrub: 1
+            start: 'top 75%',
+            end: 'bottom 85%',
+            scrub: 1.1,
+            invalidateOnRefresh: true
           }
         });
       }
-      if (trackRibbon) {
-        window.gsap.fromTo(trackRibbon,
-          { opacity: 0.65, y: -40 },
-          {
-            opacity: 1,
-            y: 40,
-            ease: 'none',
-            scrollTrigger: {
-              trigger: section,
-              start: 'top bottom',
-              end: 'bottom top',
-              scrub: 1.5
-            }
-          }
-        );
-      }
 
-      // 2. Animação de cada Etapa (Stages 1, 2, 3)
+      // 2. Revelação Progressiva Sincronizada dos Produtos e Cards
       const stages = section.querySelectorAll('.showcase-stage');
       stages.forEach((stage, idx) => {
         const card = stage.querySelector('.showcase-editorial-card');
@@ -2929,79 +2925,61 @@
         const halo = stage.querySelector('.showcase-product-halo');
         const shadow = stage.querySelector('.showcase-product-shadow');
 
-        const isEven = idx % 2 === 1;
-
-        // Revelação de entrada da etapa
-        const tl = window.gsap.timeline({
+        // Timeline de entrada acionada no momento em que a linha atinge a altura do item
+        const stageTl = window.gsap.timeline({
           scrollTrigger: {
             trigger: stage,
-            start: 'top 82%',
-            end: 'top 38%',
+            start: 'top 75%',
+            end: 'top 35%',
             scrub: 0.8
           }
         });
 
-        if (card) {
-          tl.from(card, {
-            y: 60,
-            opacity: 0,
-            scale: 0.94,
-            duration: 1,
-            ease: 'power2.out'
-          }, 0);
+        if (product) {
+          stageTl.fromTo(product,
+            { opacity: 0, y: 50, scale: 0.9 },
+            {
+              opacity: 1,
+              y: 0,
+              scale: 1,
+              duration: 1,
+              ease: 'power2.out'
+            },
+            0
+          );
         }
 
-        if (product) {
-          tl.from(product, {
-            y: 110,
-            opacity: 0,
-            scale: 0.88,
-            rotation: isEven ? -18 : 16,
-            duration: 1.2,
-            ease: 'power2.out'
-          }, 0.1);
+        if (card) {
+          stageTl.fromTo(card,
+            { opacity: 0, y: 35 },
+            {
+              opacity: 1,
+              y: 0,
+              duration: 0.9,
+              ease: 'power2.out'
+            },
+            0.1
+          );
         }
 
         if (halo) {
-          tl.from(halo, {
-            scale: 0.6,
-            opacity: 0,
-            duration: 1,
-            ease: 'power2.out'
-          }, 0.15);
-        }
-
-        // Parallax contínuo enquanto a etapa percorre o viewport
-        if (product) {
-          window.gsap.to(product, {
-            yPercent: isEven ? -16 : -20,
-            rotation: isEven ? '+=4' : '-=4',
-            ease: 'none',
-            scrollTrigger: {
-              trigger: stage,
-              start: 'top bottom',
-              end: 'bottom top',
-              scrub: 1.2
-            }
-          });
+          stageTl.fromTo(halo,
+            { opacity: 0, scale: 0.7 },
+            { opacity: 1, scale: 1, duration: 1 },
+            0.15
+          );
         }
 
         if (shadow) {
-          window.gsap.to(shadow, {
-            scaleX: 0.85,
-            opacity: 0.6,
-            ease: 'none',
-            scrollTrigger: {
-              trigger: stage,
-              start: 'top bottom',
-              end: 'bottom top',
-              scrub: 1.2
-            }
-          });
+          stageTl.fromTo(shadow,
+            { opacity: 0, scaleX: 0.7 },
+            { opacity: 1, scaleX: 1, duration: 1 },
+            0.15
+          );
         }
       });
 
-      // 3. Apresentação Final (Grand Finale)
+      // 3. Revelação da Apresentação Final (Grand Finale)
       const finale = section.querySelector('.showcase-finale');
       if (finale) {
         const title = finale.querySelector('.showcase-finale-title');
@@ -3022,25 +3000,25 @@
         });
 
         if (eyebrow) {
-          finaleTl.from(eyebrow, { y: 25, opacity: 0, duration: 0.6 }, 0);
+          finaleTl.fromTo(eyebrow, { y: 25, opacity: 0 }, { y: 0, opacity: 1, duration: 0.6 }, 0);
         }
         if (title) {
-          finaleTl.from(title, { y: 40, opacity: 0, duration: 0.8 }, 0.1);
+          finaleTl.fromTo(title, { y: 40, opacity: 0 }, { y: 0, opacity: 1, duration: 0.8 }, 0.1);
         }
         if (subtitle) {
-          finaleTl.from(subtitle, { y: 30, opacity: 0, duration: 0.8 }, 0.2);
+          finaleTl.fromTo(subtitle, { y: 30, opacity: 0 }, { y: 0, opacity: 1, duration: 0.8 }, 0.2);
         }
         if (ctaBtn) {
-          finaleTl.from(ctaBtn, { y: 35, opacity: 0, scale: 0.92, duration: 0.8 }, 0.3);
+          finaleTl.fromTo(ctaBtn, { y: 35, opacity: 0, scale: 0.92 }, { y: 0, opacity: 1, scale: 1, duration: 0.8 }, 0.3);
         }
         if (ctaArrow) {
-          finaleTl.from(ctaArrow, { opacity: 0, scale: 0.7, rotation: -20, duration: 0.6 }, 0.4);
+          finaleTl.fromTo(ctaArrow, { opacity: 0, scale: 0.7, rotation: -20 }, { opacity: 1, scale: 1, rotation: -8, duration: 0.6 }, 0.4);
         }
         if (flankLeft) {
-          finaleTl.from(flankLeft, { y: 60, opacity: 0, rotation: 6, duration: 1 }, 0.2);
+          finaleTl.fromTo(flankLeft, { y: 60, opacity: 0, rotation: 6 }, { y: 0, opacity: 0.85, rotation: 14, duration: 1 }, 0.2);
         }
         if (flankRight) {
-          finaleTl.from(flankRight, { y: 60, opacity: 0, rotation: -6, duration: 1 }, 0.25);
+          finaleTl.fromTo(flankRight, { y: 60, opacity: 0, rotation: -6 }, { y: 0, opacity: 0.85, rotation: -14, duration: 1 }, 0.25);
         }
       }
     }
