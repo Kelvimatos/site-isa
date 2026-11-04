@@ -1899,10 +1899,9 @@
       '.section-header',
       '.categories-grid .category-card',
       '.catalog-controls',
-      '.skincare-main-figure',
-      '.skincare-info-figure',
-      '.skincare-text-column',
-      '.ritual-steps-list .ritual-step',
+      '.showcase-intro-header',
+      '.showcase-stage',
+      '.showcase-finale',
       '.benefits-grid .benefit-card'
     ];
 
@@ -2783,47 +2782,7 @@
       });
     }
 
-    // 4. Seção Editorial Skincare
-    const skincareSection = document.getElementById('cuidados-pele');
-    if (skincareSection) {
-      registerSection(skincareSection, (section, { useScroll, useTransform }) => {
-        const scrollYProgress = useScroll({
-          target: section,
-          offset: ['start end', 'end start']
-        });
-
-        const skincareImgY = useTransform(scrollYProgress, [0, 1], ['-8%', '8%']);
-        const figcaptionOpacity = useTransform(scrollYProgress, [0.18, 0.38, 0.75, 0.95], [0, 1, 1, 0]);
-        const infoFigureY = useTransform(scrollYProgress, [0, 1], ['18px', '-18px']);
-
-        const editorialImg = section.querySelector('.skincare-editorial-img');
-        const figcaptionEl = section.querySelector('.skincare-figcaption');
-        const infoFigureEl = section.querySelector('.skincare-info-figure');
-
-        return [
-          {
-            element: editorialImg,
-            apply: (scale) => {
-              editorialImg.style.setProperty('--parallax-y', skincareImgY(scale));
-            }
-          },
-          {
-            element: figcaptionEl,
-            apply: () => {
-              figcaptionEl.style.setProperty('--parallax-opacity', figcaptionOpacity(1));
-            }
-          },
-          {
-            element: infoFigureEl,
-            apply: (scale) => {
-              infoFigureEl.style.setProperty('--parallax-y', infoFigureY(scale));
-            }
-          }
-        ].filter((b) => b.element);
-      });
-    }
-
-    // 5. Seção de Benefícios
+    // 4. Seção de Benefícios
     const beneficiosSection = document.getElementById('beneficios');
     if (beneficiosSection) {
       registerSection(beneficiosSection, (section, { useScroll, useTransform }) => {
@@ -2919,11 +2878,180 @@
     };
   }
 
+  
+  function initProductShowcaseAnimation() {
+    const section = document.getElementById('cuidados-pele');
+    if (!section) return;
+
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (prefersReducedMotion) return;
+
+    if (typeof window.gsap !== 'undefined' && typeof window.ScrollTrigger !== 'undefined') {
+      window.gsap.registerPlugin(window.ScrollTrigger);
+
+      // 1. Trilha Ondulada SVG (Wave Track Ribbon & Line)
+      const trackLine = section.querySelector('.showcase-track-line');
+      const trackRibbon = section.querySelector('.showcase-track-ribbon');
+      if (trackLine) {
+        window.gsap.to(trackLine, {
+          strokeDashoffset: -600,
+          ease: 'none',
+          scrollTrigger: {
+            trigger: section,
+            start: 'top bottom',
+            end: 'bottom top',
+            scrub: 1
+          }
+        });
+      }
+      if (trackRibbon) {
+        window.gsap.fromTo(trackRibbon,
+          { opacity: 0.65, y: -40 },
+          {
+            opacity: 1,
+            y: 40,
+            ease: 'none',
+            scrollTrigger: {
+              trigger: section,
+              start: 'top bottom',
+              end: 'bottom top',
+              scrub: 1.5
+            }
+          }
+        );
+      }
+
+      // 2. Animação de cada Etapa (Stages 1, 2, 3)
+      const stages = section.querySelectorAll('.showcase-stage');
+      stages.forEach((stage, idx) => {
+        const card = stage.querySelector('.showcase-editorial-card');
+        const product = stage.querySelector('.showcase-product-figure');
+        const halo = stage.querySelector('.showcase-product-halo');
+        const shadow = stage.querySelector('.showcase-product-shadow');
+
+        const isEven = idx % 2 === 1;
+
+        // Revelação de entrada da etapa
+        const tl = window.gsap.timeline({
+          scrollTrigger: {
+            trigger: stage,
+            start: 'top 82%',
+            end: 'top 38%',
+            scrub: 0.8
+          }
+        });
+
+        if (card) {
+          tl.from(card, {
+            y: 60,
+            opacity: 0,
+            scale: 0.94,
+            duration: 1,
+            ease: 'power2.out'
+          }, 0);
+        }
+
+        if (product) {
+          tl.from(product, {
+            y: 110,
+            opacity: 0,
+            scale: 0.88,
+            rotation: isEven ? -18 : 16,
+            duration: 1.2,
+            ease: 'power2.out'
+          }, 0.1);
+        }
+
+        if (halo) {
+          tl.from(halo, {
+            scale: 0.6,
+            opacity: 0,
+            duration: 1,
+            ease: 'power2.out'
+          }, 0.15);
+        }
+
+        // Parallax contínuo enquanto a etapa percorre o viewport
+        if (product) {
+          window.gsap.to(product, {
+            yPercent: isEven ? -16 : -20,
+            rotation: isEven ? '+=4' : '-=4',
+            ease: 'none',
+            scrollTrigger: {
+              trigger: stage,
+              start: 'top bottom',
+              end: 'bottom top',
+              scrub: 1.2
+            }
+          });
+        }
+
+        if (shadow) {
+          window.gsap.to(shadow, {
+            scaleX: 0.85,
+            opacity: 0.6,
+            ease: 'none',
+            scrollTrigger: {
+              trigger: stage,
+              start: 'top bottom',
+              end: 'bottom top',
+              scrub: 1.2
+            }
+          });
+        }
+      });
+
+      // 3. Apresentação Final (Grand Finale)
+      const finale = section.querySelector('.showcase-finale');
+      if (finale) {
+        const title = finale.querySelector('.showcase-finale-title');
+        const subtitle = finale.querySelector('.showcase-finale-subtitle');
+        const eyebrow = finale.querySelector('.finale-eyebrow');
+        const ctaBtn = finale.querySelector('.showcase-cta-btn');
+        const ctaArrow = finale.querySelector('.showcase-cta-arrow');
+        const flankLeft = finale.querySelector('.decor-left');
+        const flankRight = finale.querySelector('.decor-right');
+
+        const finaleTl = window.gsap.timeline({
+          scrollTrigger: {
+            trigger: finale,
+            start: 'top 82%',
+            end: 'top 45%',
+            scrub: 0.8
+          }
+        });
+
+        if (eyebrow) {
+          finaleTl.from(eyebrow, { y: 25, opacity: 0, duration: 0.6 }, 0);
+        }
+        if (title) {
+          finaleTl.from(title, { y: 40, opacity: 0, duration: 0.8 }, 0.1);
+        }
+        if (subtitle) {
+          finaleTl.from(subtitle, { y: 30, opacity: 0, duration: 0.8 }, 0.2);
+        }
+        if (ctaBtn) {
+          finaleTl.from(ctaBtn, { y: 35, opacity: 0, scale: 0.92, duration: 0.8 }, 0.3);
+        }
+        if (ctaArrow) {
+          finaleTl.from(ctaArrow, { opacity: 0, scale: 0.7, rotation: -20, duration: 0.6 }, 0.4);
+        }
+        if (flankLeft) {
+          finaleTl.from(flankLeft, { y: 60, opacity: 0, rotation: 6, duration: 1 }, 0.2);
+        }
+        if (flankRight) {
+          finaleTl.from(flankRight, { y: 60, opacity: 0, rotation: -6, duration: 1 }, 0.25);
+        }
+      }
+    }
+  }
+
   async function init() {
     loadStoredState();
     state.introController = initCinematicIntro();
     initScrollReveal();
     state.parallaxEngine = initScrollParallax();
+    initProductShowcaseAnimation();
     if (window.IMSupabase && window.IMSupabase.isConfigured()) {
       try {
         const remoteProducts = await window.IMSupabase.fetchCatalog();
