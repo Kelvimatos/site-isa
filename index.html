@@ -948,12 +948,13 @@
       <!-- Fundo Dinâmico Orgânico com Curvas SVG Flutuantes e Orbes de Iluminação -->
       <div class="showcase-ambient-canvas" aria-hidden="true">
         <!-- Trilha Contínua Ondulada conectando as etapas (estilo campanha publicitária) -->
-        <svg class="showcase-wave-track-svg" viewBox="0 0 1440 3000" preserveAspectRatio="none" fill="none">
+        <!-- 1. SVG Trilha Desktop (telas >= 769px) -->
+        <svg class="showcase-wave-track-svg showcase-svg-desktop" viewBox="0 0 1440 3000" preserveAspectRatio="none" fill="none">
           <defs>
-            <filter id="lineGlow" x="-20%" y="-20%" width="140%" height="140%">
+            <filter id="lineGlowDesktop" x="-20%" y="-20%" width="140%" height="140%">
               <feDropShadow dx="0" dy="6" stdDeviation="10" flood-color="rgba(56, 34, 22, 0.14)" />
             </filter>
-            <linearGradient id="trackGuideGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+            <linearGradient id="trackGuideGradDesktop" x1="0%" y1="0%" x2="0%" y2="100%">
               <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0.3" />
               <stop offset="30%" stop-color="#E8DAD0" stop-opacity="0.5" />
               <stop offset="70%" stop-color="#FFFFFF" stop-opacity="0.5" />
@@ -961,15 +962,39 @@
             </linearGradient>
           </defs>
 
-          <!-- 1. Trilha Guia Translúcida no lado direito (o percurso orgânico) -->
+          <!-- Trilha Guia Translúcida no lado direito -->
           <path class="showcase-track-guide"
             d="M 1220,60 C 1200,260 940,440 980,680 C 1020,900 1220,1080 1140,1320 C 1070,1520 940,1620 990,1860 C 1030,2040 1200,2180 1120,2380 C 1060,2520 920,2620 720,2820"
-            stroke="url(#trackGuideGrad)" stroke-width="28" stroke-linecap="round" fill="none" />
+            stroke="url(#trackGuideGradDesktop)" stroke-width="28" stroke-linecap="round" fill="none" />
 
-          <!-- 2. Linha Curva Branca Principal (Scroll-Linked: Desenhada progressivamente via GSAP) -->
+          <!-- Linha Curva Branca Principal (Scroll-Linked via GSAP) -->
           <path class="showcase-scroll-path"
             d="M 1220,60 C 1200,260 940,440 980,680 C 1020,900 1220,1080 1140,1320 C 1070,1520 940,1620 990,1860 C 1030,2040 1200,2180 1120,2380 C 1060,2520 920,2620 720,2820"
-            stroke="#FFFFFF" stroke-width="7" stroke-linecap="round" filter="url(#lineGlow)" fill="none" />
+            stroke="#FFFFFF" stroke-width="7" stroke-linecap="round" filter="url(#lineGlowDesktop)" fill="none" />
+        </svg>
+
+        <!-- 2. SVG Trilha Mobile (telas <= 768px: adaptado à proporção vertical do mobile) -->
+        <svg class="showcase-wave-track-svg showcase-svg-mobile" viewBox="0 0 390 2600" preserveAspectRatio="none" fill="none">
+          <defs>
+            <filter id="lineGlowMobile" x="-20%" y="-20%" width="140%" height="140%">
+              <feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="rgba(56, 34, 22, 0.12)" />
+            </filter>
+            <linearGradient id="trackGuideGradMobile" x1="0%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0.35" />
+              <stop offset="35%" stop-color="#E8DAD0" stop-opacity="0.5" />
+              <stop offset="70%" stop-color="#FFFFFF" stop-opacity="0.5" />
+              <stop offset="100%" stop-color="#E8DAD0" stop-opacity="0.35" />
+            </linearGradient>
+          </defs>
+
+          <!-- Trilha Mobile: desce pelas margens laterais nos cards e conecta suavemente atrás dos produtos -->
+          <path class="showcase-track-guide"
+            d="M 320,40 C 350,160 365,300 365,480 C 365,600 240,660 195,780 C 160,890 365,960 365,1160 C 365,1280 240,1340 195,1450 C 160,1560 365,1630 365,1830 C 365,1950 240,2010 195,2120 C 175,2210 195,2280 195,2480"
+            stroke="url(#trackGuideGradMobile)" stroke-width="16" stroke-linecap="round" fill="none" />
+
+          <path class="showcase-scroll-path"
+            d="M 320,40 C 350,160 365,300 365,480 C 365,600 240,660 195,780 C 160,890 365,960 365,1160 C 365,1280 240,1340 195,1450 C 160,1560 365,1630 365,1830 C 365,1950 240,2010 195,2120 C 175,2210 195,2280 195,2480"
+            stroke="#FFFFFF" stroke-width="5" stroke-linecap="round" filter="url(#lineGlowMobile)" fill="none" />
         </svg>
 
         <!-- Orbes de luz e formas orgânicas -->
@@ -1016,7 +1041,7 @@
             <figure class="showcase-product-figure product-tilt-right">
               <img src="./assets/images/produto-esfoliante-cutout.png"
                 alt="Esfoliante Rosto e Corpo Morango Banho Premium Bio Instinto 150g"
-                width="640" height="853" loading="lazy" class="showcase-product-img">
+                width="640" height="853" loading="eager" decoding="async" class="showcase-product-img">
               <div class="showcase-product-shadow"></div>
             </figure>
           </div>
@@ -1047,7 +1072,7 @@
             <figure class="showcase-product-figure product-tilt-left">
               <img src="./assets/images/produto-escova-cutout.png"
                 alt="Escova de Limpeza Facial 2 em 1 Rosa com cerdas anatômicas macias e silicone"
-                width="640" height="853" loading="lazy" class="showcase-product-img">
+                width="640" height="853" loading="eager" decoding="async" class="showcase-product-img">
               <div class="showcase-product-shadow"></div>
             </figure>
           </div>
@@ -1078,7 +1103,7 @@
             <figure class="showcase-product-figure product-tilt-right">
               <img src="./assets/images/produto-lipgloss-cutout.png"
                 alt="Lip Gloss Twist 6,5ml com pingente de coração dourado"
-                width="640" height="853" loading="lazy" class="showcase-product-img">
+                width="640" height="853" loading="eager" decoding="async" class="showcase-product-img">
               <div class="showcase-product-shadow"></div>
             </figure>
           </div>

@@ -2884,22 +2884,22 @@
     if (!section) return;
 
     const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    const scrollPath = section.querySelector('.showcase-scroll-path');
+    const scrollPaths = section.querySelectorAll('.showcase-scroll-path');
 
-    // Se usuário prefere movimento reduzido, exibe a linha desenhada estaticamente
+    // Se usuário prefere movimento reduzido, exibe as linhas desenhadas estaticamente
     if (prefersReducedMotion) {
-      if (scrollPath) {
-        scrollPath.style.strokeDasharray = 'none';
-        scrollPath.style.strokeDashoffset = '0';
-      }
+      scrollPaths.forEach(path => {
+        path.style.strokeDasharray = 'none';
+        path.style.strokeDashoffset = '0';
+      });
       return;
     }
 
     if (typeof window.gsap !== 'undefined' && typeof window.ScrollTrigger !== 'undefined') {
       window.gsap.registerPlugin(window.ScrollTrigger);
 
-      // 1. Linha Curva Branca no lado direito: Desenho progressivo vinculado ao scroll (scrub)
-      if (scrollPath) {
+      // 1. Linhas Curvas (Desktop e Mobile): Desenho progressivo vinculado ao scroll (scrub)
+      scrollPaths.forEach(scrollPath => {
         const pathLength = scrollPath.getTotalLength();
         scrollPath.style.strokeDasharray = pathLength;
         scrollPath.style.strokeDashoffset = pathLength;
@@ -2915,7 +2915,7 @@
             invalidateOnRefresh: true
           }
         });
-      }
+      });
 
       // 2. Revelação Progressiva Sincronizada dos Produtos e Cards
       const stages = section.querySelectorAll('.showcase-stage');
@@ -2929,15 +2929,15 @@
         const stageTl = window.gsap.timeline({
           scrollTrigger: {
             trigger: stage,
-            start: 'top 75%',
-            end: 'top 35%',
+            start: 'top 80%',
+            end: 'top 40%',
             scrub: 0.8
           }
         });
 
         if (product) {
           stageTl.fromTo(product,
-            { opacity: 0, y: 50, scale: 0.9 },
+            { opacity: 0, y: 40, scale: 0.94 },
             {
               opacity: 1,
               y: 0,
@@ -2951,7 +2951,7 @@
 
         if (card) {
           stageTl.fromTo(card,
-            { opacity: 0, y: 35 },
+            { opacity: 0, y: 30 },
             {
               opacity: 1,
               y: 0,
@@ -2964,7 +2964,7 @@
 
         if (halo) {
           stageTl.fromTo(halo,
-            { opacity: 0, scale: 0.7 },
+            { opacity: 0, scale: 0.75 },
             { opacity: 1, scale: 1, duration: 1 },
             0.15
           );
@@ -2972,7 +2972,7 @@
 
         if (shadow) {
           stageTl.fromTo(shadow,
-            { opacity: 0, scaleX: 0.7 },
+            { opacity: 0, scaleX: 0.75 },
             { opacity: 1, scaleX: 1, duration: 1 },
             0.15
           );
@@ -3003,22 +3003,22 @@
           finaleTl.fromTo(eyebrow, { y: 25, opacity: 0 }, { y: 0, opacity: 1, duration: 0.6 }, 0);
         }
         if (title) {
-          finaleTl.fromTo(title, { y: 40, opacity: 0 }, { y: 0, opacity: 1, duration: 0.8 }, 0.1);
+          finaleTl.fromTo(title, { y: 35, opacity: 0 }, { y: 0, opacity: 1, duration: 0.8 }, 0.1);
         }
         if (subtitle) {
-          finaleTl.fromTo(subtitle, { y: 30, opacity: 0 }, { y: 0, opacity: 1, duration: 0.8 }, 0.2);
+          finaleTl.fromTo(subtitle, { y: 25, opacity: 0 }, { y: 0, opacity: 1, duration: 0.8 }, 0.2);
         }
         if (ctaBtn) {
-          finaleTl.fromTo(ctaBtn, { y: 35, opacity: 0, scale: 0.92 }, { y: 0, opacity: 1, scale: 1, duration: 0.8 }, 0.3);
+          finaleTl.fromTo(ctaBtn, { y: 30, opacity: 0, scale: 0.94 }, { y: 0, opacity: 1, scale: 1, duration: 0.8 }, 0.3);
         }
         if (ctaArrow) {
           finaleTl.fromTo(ctaArrow, { opacity: 0, scale: 0.7, rotation: -20 }, { opacity: 1, scale: 1, rotation: -8, duration: 0.6 }, 0.4);
         }
         if (flankLeft) {
-          finaleTl.fromTo(flankLeft, { y: 60, opacity: 0, rotation: 6 }, { y: 0, opacity: 0.85, rotation: 14, duration: 1 }, 0.2);
+          finaleTl.fromTo(flankLeft, { y: 50, opacity: 0, rotation: 6 }, { y: 0, opacity: 0.85, rotation: 14, duration: 1 }, 0.2);
         }
         if (flankRight) {
-          finaleTl.fromTo(flankRight, { y: 60, opacity: 0, rotation: -6 }, { y: 0, opacity: 0.85, rotation: -14, duration: 1 }, 0.25);
+          finaleTl.fromTo(flankRight, { y: 50, opacity: 0, rotation: -6 }, { y: 0, opacity: 0.85, rotation: -14, duration: 1 }, 0.25);
         }
       }
     }

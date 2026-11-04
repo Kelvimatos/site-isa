@@ -2014,6 +2014,14 @@ html.js-ready .reveal-on-scroll.is-visible {
   opacity: 0.9;
 }
 
+.showcase-svg-desktop {
+  display: block;
+}
+
+.showcase-svg-mobile {
+  display: none !important;
+}
+
 .showcase-track-guide {
   stroke-dasharray: none;
   opacity: 0.7;
@@ -2454,32 +2462,27 @@ html.js-ready .reveal-on-scroll.is-visible {
 @media (max-width: 960px) {
   .showcase-stage {
     grid-template-columns: 1fr;
-    gap: var(--space-8);
+    gap: 1.5rem;
     min-height: auto;
-    margin-bottom: clamp(3.5rem, 7vw, 5rem);
+    margin-bottom: clamp(3rem, 6vh, 4.5rem);
     text-align: center;
   }
 
-  .showcase-stage-1 .showcase-card-wrapper,
-  .showcase-stage-2 .showcase-card-wrapper,
-  .showcase-stage-3 .showcase-card-wrapper {
+  .showcase-stage .showcase-card-wrapper {
     justify-self: center;
-    max-width: 520px;
-  }
-
-  .order-mobile-product {
-    order: -1;
+    max-width: 500px;
+    width: 100%;
   }
 
   .showcase-editorial-card {
-    padding: 2rem 1.5rem;
+    padding: clamp(1.5rem, 3.5vw, 2rem) clamp(1.25rem, 3vw, 1.75rem);
   }
 
   .showcase-badge-icon {
-    top: -16px;
-    right: 12px;
-    width: 46px;
-    height: 46px;
+    top: -14px;
+    right: 14px;
+    width: 44px;
+    height: 44px;
   }
 
   .showcase-card-arrow {
@@ -2487,8 +2490,15 @@ html.js-ready .reveal-on-scroll.is-visible {
     transform: rotate(90deg);
   }
 
+  .showcase-product-wrapper {
+    width: 100%;
+    margin-top: 0.25rem;
+  }
+
   .showcase-product-img {
-    max-width: 250px;
+    max-width: 230px;
+    max-height: 270px;
+    object-fit: contain;
   }
 
   .showcase-cta-arrow {
@@ -2512,46 +2522,175 @@ html.js-ready .reveal-on-scroll.is-visible {
   }
 }
 
-@media (max-width: 540px) {
+@media (max-width: 768px) {
+  /* Ativação da Trilha SVG adaptada ao Mobile */
+  .showcase-svg-desktop {
+    display: none !important;
+  }
+
+  .showcase-svg-mobile {
+    display: block !important;
+  }
+
   .product-showcase-section {
-    padding-top: 3.5rem;
-    padding-bottom: 4.5rem;
+    padding-top: clamp(2.5rem, 6vw, 3.5rem);
+    padding-bottom: clamp(3rem, 7vw, 4.5rem);
+  }
+
+  .showcase-container {
+    padding-inline: 16px;
   }
 
   .showcase-intro-header {
-    margin-bottom: 2.5rem;
+    margin-bottom: clamp(2rem, 5vw, 2.75rem);
+    padding-inline: 0.5rem;
+  }
+
+  .showcase-main-title {
+    font-size: clamp(1.65rem, 6.2vw, 2.2rem);
+    line-height: 1.2;
+    margin-bottom: 0.6rem;
+  }
+
+  .showcase-lead {
+    font-size: clamp(0.88rem, 3.8vw, 1rem);
+    line-height: 1.55;
+  }
+
+  /* Etapa Mobile: Card em cima, Produto embaixo, sem sobreposição */
+  .showcase-stage {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.25rem;
+    min-height: auto;
+    margin-bottom: clamp(2.75rem, 6vh, 3.75rem);
+    text-align: center;
+  }
+
+  .showcase-card-wrapper {
+    order: 1;
+    width: 100%;
+    max-width: 440px;
+    margin-inline: auto;
+    z-index: 3;
+  }
+
+  .showcase-editorial-card {
+    padding: clamp(1.35rem, 4vw, 1.65rem) clamp(1.15rem, 3.5vw, 1.4rem);
+    border-radius: 22px;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    box-shadow: 0 16px 36px rgba(56, 34, 22, 0.08), 0 2px 8px rgba(56, 34, 22, 0.04);
+  }
+
+  .showcase-badge-icon {
+    top: -12px;
+    right: 12px;
+    width: 38px;
+    height: 38px;
+    border-width: 1.5px;
+  }
+
+  .badge-emoji {
+    font-size: 1.15rem;
+  }
+
+  .showcase-step-label {
+    font-size: 0.72rem;
+    letter-spacing: 0.12em;
+    margin-bottom: 0.35rem;
   }
 
   .showcase-card-title {
-    font-size: 1.75rem;
+    font-size: clamp(1.35rem, 5.2vw, 1.65rem);
+    line-height: 1.2;
+    margin-bottom: 0.5rem;
   }
 
   .showcase-card-desc {
-    font-size: 0.95rem;
+    font-size: clamp(0.86rem, 3.5vw, 0.92rem);
+    line-height: 1.55;
+    margin-bottom: 0.8rem;
+  }
+
+  .showcase-card-arrow {
+    width: 38px;
+    height: 20px;
+    margin-inline: auto !important;
+    transform: rotate(90deg);
+    opacity: 0.8;
+  }
+
+  /* Produto abaixo do Card com dimensões harmônicas */
+  .showcase-product-wrapper {
+    order: 2;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 0.15rem;
+    z-index: 2;
+  }
+
+  .showcase-product-figure {
+    position: relative;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
   }
 
   .showcase-product-img {
-    max-width: 200px;
+    max-width: clamp(160px, 44vw, 205px);
+    max-height: 250px;
+    width: auto;
+    height: auto;
+    object-fit: contain;
+    filter: drop-shadow(0 14px 26px rgba(56, 34, 22, 0.16));
   }
 
+  .showcase-product-halo {
+    width: clamp(190px, 52vw, 245px);
+    height: clamp(190px, 52vw, 245px);
+    filter: blur(28px);
+    opacity: 0.65;
+  }
+
+  .showcase-product-shadow {
+    width: clamp(115px, 34vw, 160px);
+    height: 14px;
+    filter: blur(8px);
+    margin-top: -6px;
+  }
+
+  /* Grand Finale no Mobile */
   .showcase-finale {
-    padding: 3rem 1.25rem;
-    border-radius: 24px;
+    padding: clamp(2rem, 5vw, 2.75rem) 1.25rem;
+    border-radius: 22px;
+    margin-top: 1rem;
   }
 
   .showcase-finale-title {
-    font-size: 2rem;
+    font-size: clamp(1.6rem, 5.8vw, 2rem);
+    line-height: 1.25;
+    margin-bottom: 0.6rem;
   }
 
   .showcase-finale-subtitle {
-    font-size: 0.98rem;
-    margin-bottom: 2rem;
+    font-size: clamp(0.88rem, 3.6vw, 0.95rem);
+    line-height: 1.55;
+    margin-bottom: 1.75rem;
   }
 
   .showcase-cta-btn {
     width: 100%;
-    padding: 1rem 1.5rem;
-    font-size: 0.98rem;
+    max-width: 290px;
+    margin-inline: auto;
+    padding: 0.95rem 1.4rem;
+    font-size: 0.92rem;
     justify-content: center;
   }
 
@@ -2560,7 +2699,63 @@ html.js-ready .reveal-on-scroll.is-visible {
   }
 }
 
+@media (max-width: 375px) {
+  .showcase-container {
+    padding-inline: 14px;
+  }
 
+  .showcase-editorial-card {
+    padding: 1.25rem 1rem;
+    border-radius: 18px;
+  }
+
+  .showcase-card-title {
+    font-size: 1.3rem;
+  }
+
+  .showcase-card-desc {
+    font-size: 0.84rem;
+  }
+
+  .showcase-badge-icon {
+    top: -10px;
+    right: 10px;
+    width: 34px;
+    height: 34px;
+  }
+
+  .badge-emoji {
+    font-size: 1rem;
+  }
+
+  .showcase-product-img {
+    max-width: 155px;
+    max-height: 210px;
+  }
+}
+
+@media (max-width: 320px) {
+  .showcase-container {
+    padding-inline: 12px;
+  }
+
+  .showcase-editorial-card {
+    padding: 1.15rem 0.9rem;
+  }
+
+  .showcase-card-title {
+    font-size: 1.2rem;
+  }
+
+  .showcase-card-desc {
+    font-size: 0.8rem;
+  }
+
+  .showcase-product-img {
+    max-width: 140px;
+    max-height: 190px;
+  }
+}
 /* ==========================================================================
    9. COMPROMISSO IM STORE
    ========================================================================== */
@@ -3461,9 +3656,14 @@ html.js-ready .reveal-on-scroll.is-visible {
   .hero-section {
     min-height: auto;
     padding-top: var(--space-4);
-    padding-bottom: var(--space-8);
+    padding-bottom: var(--space-4);
     overflow-x: clip;
     overflow-y: visible;
+  }
+
+  /* Oculta completamente a faixa marrom no mobile/tablet, eliminando espaço residual */
+  .imstore-ribbon {
+    display: none !important;
   }
 
   .hero-Select-backdrop {
@@ -3614,6 +3814,10 @@ html.js-ready .reveal-on-scroll.is-visible {
 }
 
 @media (max-width: 768px) {
+  .categories-section {
+    padding-top: clamp(2rem, 5vw, 3rem);
+  }
+
   .header-main-inner {
     gap: var(--space-2);
   }
